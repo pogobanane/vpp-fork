@@ -23,12 +23,17 @@
 #include <vppinfra/error.h>
 #include <vppinfra/elog.h>
 
+#include <benchplug/ipc.h>
+
 typedef struct {
     /* API message ID base */
     u16 msg_id_base;
 
     /* convenience */
     vnet_main_t * vnet_main;
+
+    /* IPC handle */
+    sample_ipc_main_t ipc;
 } sample_main_t;
 
 extern sample_main_t sample_main;

@@ -20,6 +20,7 @@ add_vpp_plugin(benchplug
   SOURCES
   node.c
   sample.c
+  ipc.c
 
   MULTIARCH_SOURCES
   node.c

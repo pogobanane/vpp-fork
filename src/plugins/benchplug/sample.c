@@ -228,6 +228,55 @@ VLIB_CLI_COMMAND (benchplug_addbd1, static) = {
     .function = benchplug_macadd_command_fn,
 };
 
+static clib_error_t *
+ai_ctl_command_fn (vlib_main_t * vm,
+           unformat_input_t * input, vlib_cli_command_t * cmd)
+{
+  sample_main_t * sm = &sample_main;
+  u32 is_start = 0;
+  u32 is_stop = 0;
+
+  clib_error_t *error = 0;
+
+  while (unformat_check_input (input) != UNFORMAT_END_OF_INPUT)
+    {
+      if (unformat (input, "start"))
+  is_start = 1;
+      else if (unformat (input, "stop"))
+  is_stop = 1;
+      else
+  break;
+    }
+
+  if (is_start)
+    {
+	    // TODO initialize ipc
+	    int ret = sample_ipc_open(&(sm->ipc));
+	    if (ret < 0) {
+		return clib_error_return(0, "sample ipc error %d", ret);
+	    }
+
+    }
+  else if (is_stop)
+    {
+	error = sample_ipc_close(&(sm->ipc));
+    }
+
+  return error;
+}
+
+
+/**
+ * @brief Proof of concept implementation for vpp performance 
+ * optimization using AI (idp-okelmann, vpp-benchplug)
+ */
+VLIB_CLI_COMMAND (ai_ctl, static) = {
+    .path = "ai",
+    .short_help = 
+    "ai [ start | stop ]",
+    .function = ai_ctl_command_fn,
+};
+
 /**
  * @brief Plugin API message handler.
  */
