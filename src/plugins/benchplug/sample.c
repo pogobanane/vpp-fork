@@ -235,6 +235,7 @@ ai_ctl_command_fn (vlib_main_t * vm,
   sample_main_t * sm = &sample_main;
   u32 is_start = 0;
   u32 is_stop = 0;
+  u32 is_comm = 0;
 
   clib_error_t *error = 0;
 
@@ -244,6 +245,8 @@ ai_ctl_command_fn (vlib_main_t * vm,
   is_start = 1;
       else if (unformat (input, "stop"))
   is_stop = 1;
+      else if (unformat (input, "comm"))
+  is_comm = 1;
       else
   break;
     }
@@ -255,6 +258,13 @@ ai_ctl_command_fn (vlib_main_t * vm,
 	    if (ret < 0) {
 		return clib_error_return(0, "sample ipc error %d", ret);
 	    }
+
+    }
+  else if (is_comm)
+    {
+      vlib_cli_output (vm, "AI: communicating...");
+      u32 val = sample_ipc_communicate_to_server(&(sm->ipc));
+      vlib_cli_output (vm, "done. Val: %d", val);
 
     }
   else if (is_stop)
@@ -273,7 +283,7 @@ ai_ctl_command_fn (vlib_main_t * vm,
 VLIB_CLI_COMMAND (ai_ctl, static) = {
     .path = "ai",
     .short_help = 
-    "ai [ start | stop ]",
+    "ai [ start | comm | stop ]",
     .function = ai_ctl_command_fn,
 };
 

@@ -9,6 +9,13 @@
 
 // TODO remove int's
 
+struct sample_ipc_mem_t {
+	atomic_char guard;
+	char msg[15];
+};
+
+void mmap_notify_client(atomic_char *guard);
+
 int make_space(int file_descriptor, int bytes) 
 {
 	lseek(file_descriptor, bytes + 1, SEEK_SET);
@@ -66,6 +73,10 @@ int sample_ipc_open(sample_ipc_main_t *self)
 	self->memory = file_memory;
 	self->size = mmap_size;
 
+	// initialize
+	atomic_char *guard = &(self->memory->guard);
+	mmap_notify_client(guard); // #c
+
 	// we don't need fd anymore
 	if (close(fd) < 0) {
 		return -4; // error closing file
@@ -85,29 +96,65 @@ clib_error_t* sample_ipc_close(sample_ipc_main_t *self)
 	return 0;
 }
 
-void mmap_wait(atomic_char *guard) 
+/*
+ * as a server, wait for the client
+ * TODO replace this by lock/unlock
+ */
+void mmap_wait_for_client(atomic_char *guard) 
 {
 	while (atomic_load(guard) != 's')
 		;
 }
 
-void mmap_notify(atomic_char *guard)
+void mmap_wait_for_server(atomic_char *guard) 
+{
+	while (atomic_load(guard) != 'c')
+		;
+}
+
+void mmap_notify_client(atomic_char *guard)
 {
 	atomic_store(guard, 'c');
 }
 
-u32 sample_ipc_communicate(sample_ipc_main_t *self)
+void mmap_notify_server(atomic_char *guard)
 {
-	atomic_char *guard = (atomic_char *)self->memory;
-	u32 response = 0;
+	atomic_store(guard, 's');
+}
 
-	mmap_wait(guard);
+/*
+ * client: sends data to server and receives answer
+ */ 
+uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self)
+{
+	atomic_char *guard = &(self->memory->guard);
+	uint32_t response = 0;
+
+	mmap_wait_for_server(guard); // #c
 	char msg[15];
-	strcpy(msg, 'msg frm srvr');
-	memset(self->memory, 0, self->size);
-	memcpy(self->memory, msg, 15);
-	mmap_notify(guard);
-	mmap_wait(guard);
-	memcpy(&response, self->memory, sizeof(response));
+	strcpy(msg, "msg frm clnt");
+	memset(&(self->memory->msg), 0, self->size);
+	memcpy(&(self->memory->msg), msg, 15);
+	mmap_notify_server(guard); // #s
+	mmap_wait_for_server(guard); // #c
+	memcpy(&response, &(self->memory->msg), sizeof(response));
 	return response;
+}
+
+/*
+ * server: receives data from client and sends result
+ */ 
+void sample_ipc_communicate_to_client(sample_ipc_main_t *self)
+{
+	atomic_char *guard = &(self->memory->guard);
+	uint32_t response = 7;
+
+	mmap_wait_for_client(guard); // #s
+	// TODO read data
+	memset(&(self->memory->msg), 0, self->size);
+	memcpy(&(self->memory->msg), &response, sizeof(response));
+	mmap_notify_client(guard); // #c
+	// mmap_wait_for_server(guard);
+	// memcpy(&response, self->memory, sizeof(response));
+	// return response;
 }
