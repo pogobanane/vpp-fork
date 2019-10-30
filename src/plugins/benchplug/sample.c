@@ -263,9 +263,9 @@ ai_ctl_command_fn (vlib_main_t * vm,
   else if (is_comm)
     {
       vlib_cli_output (vm, "AI: communicating...");
-      char request[SAMPLE_IPC_MEM_REQUEST_SIZE];
-      strncpy(request, "reqst msg", SAMPLE_IPC_MEM_REQUEST_SIZE);
-      u32 val = sample_ipc_communicate_to_server(&(sm->ipc), request);
+      sample_ipc_for_server_t request;
+      request.n_rx_packets = 666;
+      u32 val = sample_ipc_communicate_to_server(&(sm->ipc), &request);
       vlib_cli_output (vm, "done. Val: %d", val);
 
     }

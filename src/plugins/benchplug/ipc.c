@@ -12,7 +12,7 @@
 struct sample_ipc_mem_t {
 	atomic_char guard;
 	uint32_t response;
-	char request[SAMPLE_IPC_MEM_REQUEST_SIZE];
+	sample_ipc_for_server_t request[SAMPLE_IPC_MEM_REQUEST_SIZE];
 };
 
 void mmap_release(atomic_char *guard);
@@ -144,17 +144,18 @@ void mmap_release(atomic_char *guard)
  * client: writes buf to server and returns received answer
  * TODO: bufs size is not checked
  */ 
-uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, char* buf)
+uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, sample_ipc_for_server_t* buf)
 {
 	atomic_char *guard = &(self->memory->guard);
 	uint32_t response = 0;
 
 	mmap_client_wait(guard);
 	mmap_client_take(guard); // c
-	char msg[SAMPLE_IPC_MEM_REQUEST_SIZE];
-	strncpy(msg, buf, sizeof(msg));
-	memset(&(self->memory->request), 0, SAMPLE_IPC_MEM_REQUEST_SIZE);
-	memcpy(&(self->memory->request), msg, SAMPLE_IPC_MEM_REQUEST_SIZE);
+	// not needed anymore since we don't use strings anymore
+	//sample_ipc_for_server_t msg[SAMPLE_IPC_MEM_REQUEST_SIZE];
+	// strncpy(msg, buf, sizeof(msg));
+	// memset(&(self->memory->request), 0, SAMPLE_IPC_MEM_REQUEST_SIZE);
+	memcpy(&(self->memory->request), buf, sizeof(sample_ipc_for_server_t));
 	memcpy(&response, &(self->memory->response), sizeof(response));
 	mmap_release(guard); // n
 	return response;
@@ -163,13 +164,13 @@ uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, char* buf)
 /*
  * server: reads data from client, writes it to request and sends response
  */ 
-void sample_ipc_communicate_to_client(sample_ipc_main_t *self, uint32_t response, char* request)
+void sample_ipc_communicate_to_client(sample_ipc_main_t *self, uint32_t response, sample_ipc_for_server_t* request)
 {
 	atomic_char *guard = &(self->memory->guard);
 
 	mmap_server_wait(guard); 
 	mmap_server_take(guard); // s
-	memcpy(request, &(self->memory->request), SAMPLE_IPC_MEM_REQUEST_SIZE);
+	memcpy(request, &(self->memory->request), sizeof(sample_ipc_for_server_t));
 	memcpy(&(self->memory->response), &response, sizeof(response));
 	mmap_release(guard); // n
 	// mmap_wait_for_server(guard);
