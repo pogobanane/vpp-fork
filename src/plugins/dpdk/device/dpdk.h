@@ -45,6 +45,7 @@
 #include <rte_flow.h>
 
 #include <vnet/devices/devices.h>
+#include <benchplug/ipc.h>
 
 #if CLIB_DEBUG > 0
 #define always_inline static inline
@@ -421,6 +422,9 @@ typedef struct
   /* control interval of dpdk link state and stat polling */
   f64 link_state_poll_interval;
   f64 stat_poll_interval;
+
+  /* ai4p IPC connection state */
+  sample_ipc_main_t ai_ipc;
 
   /* convenience */
   vlib_main_t *vlib_main;

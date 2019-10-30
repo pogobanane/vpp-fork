@@ -1672,6 +1672,10 @@ dpdk_init (vlib_main_t * vm)
   dm->vlib_main = vm;
   dm->vnet_main = vnet_get_main ();
   dm->conf = &dpdk_config_main;
+  // TODO dm->ai_connection = setup();
+
+  if (0 != sample_ipc_open(&(dm->ai_ipc)) )
+  	return clib_error_return(0, "could not open IPC (in ai4p)");
 
   dm->conf->nchannels = 4;
   vec_add1 (dm->conf->eal_init_args, (u8 *) "vnet");

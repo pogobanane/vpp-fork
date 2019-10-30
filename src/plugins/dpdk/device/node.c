@@ -314,11 +314,17 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
       if (n < 32)
 	break;
     }
+  
+  // TODO ipc.push(n_rx_packets)
+  sample_ipc_for_server_t msg;
+  msg.n_rx_packets = n_rx_packets;
+  sample_ipc_communicate_to_server(&(dm->ai_ipc), &msg); 
+
 
   if (n_rx_packets == 0)
     return 0;
 
-  /* Update buffer template */
+    /* Update buffer template */
   vnet_buffer (bt)->sw_if_index[VLIB_RX] = xd->sw_if_index;
   bt->error = node->errors[DPDK_ERROR_NONE];
   /* as DPDK is allocating empty buffers from mempool provided before interface
