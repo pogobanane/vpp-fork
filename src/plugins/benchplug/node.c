@@ -183,9 +183,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 		    vlib_add_trace (vm, node, b0, sizeof (*t));
 		  t->sw_if_index = sw_if_index0;
 		  t->next_index = next0;
-		  clib_memcpy_fast (t->new_src_mac, en0->src_address,
+		  clib_memcpy (t->new_src_mac, en0->src_address,
 				    sizeof (t->new_src_mac));
-		  clib_memcpy_fast (t->new_dst_mac, en0->dst_address,
+		  clib_memcpy (t->new_dst_mac, en0->dst_address,
 				    sizeof (t->new_dst_mac));
 
 		}
@@ -195,9 +195,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 		    vlib_add_trace (vm, node, b1, sizeof (*t));
 		  t->sw_if_index = sw_if_index1;
 		  t->next_index = next1;
-		  clib_memcpy_fast (t->new_src_mac, en1->src_address,
+		  clib_memcpy (t->new_src_mac, en1->src_address,
 				    sizeof (t->new_src_mac));
-		  clib_memcpy_fast (t->new_dst_mac, en1->dst_address,
+		  clib_memcpy (t->new_dst_mac, en1->dst_address,
 				    sizeof (t->new_dst_mac));
 		}
 	    }
@@ -256,9 +256,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 	      sample_trace_t *t = vlib_add_trace (vm, node, b0, sizeof (*t));
 	      t->sw_if_index = sw_if_index0;
 	      t->next_index = next0;
-	      clib_memcpy_fast (t->new_src_mac, en0->src_address,
+	      clib_memcpy (t->new_src_mac, en0->src_address,
 				sizeof (t->new_src_mac));
-	      clib_memcpy_fast (t->new_dst_mac, en0->dst_address,
+	      clib_memcpy (t->new_dst_mac, en0->dst_address,
 				sizeof (t->new_dst_mac));
 	    }
 
@@ -367,9 +367,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 		    vlib_add_trace (vm, node, b0, sizeof (*t));
 		  t->sw_if_index = sw_if_index0;
 		  t->next_index = next0;
-		  clib_memcpy_fast (t->new_src_mac, en0->src_address,
+		  clib_memcpy (t->new_src_mac, en0->src_address,
 				    sizeof (t->new_src_mac));
-		  clib_memcpy_fast (t->new_dst_mac, en0->dst_address,
+		  clib_memcpy (t->new_dst_mac, en0->dst_address,
 				    sizeof (t->new_dst_mac));
 
 		}
@@ -379,9 +379,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 		    vlib_add_trace (vm, node, b1, sizeof (*t));
 		  t->sw_if_index = sw_if_index1;
 		  t->next_index = next1;
-		  clib_memcpy_fast (t->new_src_mac, en1->src_address,
+		  clib_memcpy (t->new_src_mac, en1->src_address,
 				    sizeof (t->new_src_mac));
-		  clib_memcpy_fast (t->new_dst_mac, en1->dst_address,
+		  clib_memcpy (t->new_dst_mac, en1->dst_address,
 				    sizeof (t->new_dst_mac));
 		}
 	    }
@@ -432,9 +432,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 	      sample_trace_t *t = vlib_add_trace (vm, node, b0, sizeof (*t));
 	      t->sw_if_index = sw_if_index0;
 	      t->next_index = next0;
-	      clib_memcpy_fast (t->new_src_mac, en0->src_address,
+	      clib_memcpy (t->new_src_mac, en0->src_address,
 				sizeof (t->new_src_mac));
-	      clib_memcpy_fast (t->new_dst_mac, en0->dst_address,
+	      clib_memcpy (t->new_dst_mac, en0->dst_address,
 				sizeof (t->new_dst_mac));
 	    }
 
@@ -585,9 +585,9 @@ VLIB_NODE_FN (sample_node) (vlib_main_t * vm, vlib_node_runtime_t * node,
 	      t->sw_if_index = vnet_buffer (b[0])->sw_if_index[VLIB_TX];
 	      t->next_index = SAMPLE_NEXT_INTERFACE_OUTPUT;
 	      en = vlib_buffer_get_current (b[0]);
-	      clib_memcpy_fast (t->new_src_mac, en->src_address,
+	      clib_memcpy (t->new_src_mac, en->src_address,
 				sizeof (t->new_src_mac));
-	      clib_memcpy_fast (t->new_dst_mac, en->dst_address,
+	      clib_memcpy (t->new_dst_mac, en->dst_address,
 				sizeof (t->new_dst_mac));
 	      b++;
 	    }
