@@ -187,7 +187,7 @@ sample_plugin_api_hookup (vlib_main_t *vm)
 }
 
 #define vl_msg_name_crc_list
-#include <sample/sample_all_api_h.h>
+#include <benchplug/sample_all_api_h.h>
 #undef vl_msg_name_crc_list
 
 static void 
