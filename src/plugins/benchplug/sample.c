@@ -167,7 +167,7 @@ static clib_error_t *
 benchplug_macadd_command_fn (vlib_main_t * vm,
            unformat_input_t * input, vlib_cli_command_t * cmd)
 {
-  vnet_main_t *vnm = vnet_get_main();
+  vnet_main_t *nvm = vnet_get_main();
   clib_error_t *error = 0;
   u8 mac[6], save_mac[6];
   u32 bd_index = 1;
@@ -219,7 +219,7 @@ benchplug_macadd_command_fn (vlib_main_t * vm,
 /**
  * @brief CLI command to enable/disable the sample macswap plugin.
  */
-VLIB_CLI_COMMAND (sr_content_command, static) = {
+VLIB_CLI_COMMAND (benchplug_addbd1, static) = {
     .path = "benchplugaddbd1",
     .short_help = 
     "benchplugaddbd1 count <count> mac <macDstBase> int <intDst>",
