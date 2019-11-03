@@ -149,6 +149,9 @@ VLIB_CLI_COMMAND (sr_content_command, static) = {
     .function = macswap_enable_disable_command_fn,
 };
 
+
+#include <vnet/l2/l2_fib.h>
+
 static void
 incr_mac_address (u8 * mac)
 {
@@ -158,49 +161,6 @@ incr_mac_address (u8 * mac)
   tmp = clib_host_to_net_u64 (tmp);
 
   clib_memcpy (mac, &tmp, 6);
-}
-
-
-/**
- * Add an entry to the l2fib.
- * If the entry already exists then overwrite it
- */
-void
-l2fib_add_entry (const u8 * mac, u32 bd_index,
-     u32 sw_if_index, l2fib_entry_result_flags_t flags)
-{
-  l2fib_entry_key_t key;
-  l2fib_entry_result_t result;
-  __attribute__ ((unused)) u32 bucket_contents;
-  l2fib_main_t *fm = &l2fib_main;
-  l2learn_main_t *lm = &l2learn_main;
-  BVT (clib_bihash_kv) kv;
-
-  /* set up key */
-  key.raw = l2fib_make_key (mac, bd_index);
-
-  /* check if entry already exist */
-  if (BV (clib_bihash_search) (&fm->mac_table, &kv, &kv))
-    {
-      /* decrement counter if overwriting a learned mac  */
-      result.raw = kv.value;
-      if ((!l2fib_entry_result_is_set_AGE_NOT (&result))
-    && (lm->global_learn_count))
-  lm->global_learn_count--;
-    }
-
-  /* set up result */
-  result.raw = 0;   /* clear all fields */
-  result.fields.sw_if_index = sw_if_index;
-  result.fields.flags = flags;
-
-  /* no aging for provisioned entry */
-  l2fib_entry_result_set_AGE_NOT (&result);
-
-  kv.key = key.raw;
-  kv.value = result.raw;
-
-  BV (clib_bihash_add_del) (&fm->mac_table, &kv, 1 /* is_add */ );
 }
 
 static clib_error_t *
@@ -237,9 +197,9 @@ benchplug_macadd_command_fn (vlib_main_t * vm,
   if (if_set == 0)
     return clib_error_return (0, "interface not set");
 
-  if (is_add == 0 && is_del == 0)
+  if (is_add == 0)
     return clib_error_return (0,
-            "noop: pick at least one of (add,del)");
+            "noop: pick at least one of (add)");
 
   clib_memcpy (save_mac, mac, 6);
 
