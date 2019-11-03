@@ -17,7 +17,7 @@
 #include <vnet/pg/pg.h>
 #include <vnet/ethernet/ethernet.h>
 #include <vppinfra/error.h>
-#include <sample/sample.h>
+#include <benchplug/sample.h>
 
 typedef struct
 {

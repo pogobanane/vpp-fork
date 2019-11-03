@@ -19,33 +19,33 @@
 
 #include <vnet/vnet.h>
 #include <vnet/plugin/plugin.h>
-#include <sample/sample.h>
+#include <benchplug/sample.h>
 
 #include <vlibapi/api.h>
 #include <vlibmemory/api.h>
 
 /* define message IDs */
-#include <sample/sample_msg_enum.h>
+#include <benchplug/sample_msg_enum.h>
 
 /* define message structures */
 #define vl_typedefs
-#include <sample/sample_all_api_h.h> 
+#include <benchplug/sample_all_api_h.h> 
 #undef vl_typedefs
 
 /* define generated endian-swappers */
 #define vl_endianfun
-#include <sample/sample_all_api_h.h> 
+#include <benchplug/sample_all_api_h.h> 
 #undef vl_endianfun
 
 /* instantiate all the print functions we know about */
 #define vl_print(handle, ...) vlib_cli_output (handle, __VA_ARGS__)
 #define vl_printfun
-#include <sample/sample_all_api_h.h> 
+#include <benchplug/sample_all_api_h.h> 
 #undef vl_printfun
 
 /* Get the API version number */
 #define vl_api_version(n,v) static u32 api_version=(v);
-#include <sample/sample_all_api_h.h>
+#include <benchplug/sample_all_api_h.h>
 #undef vl_api_version
 
 #define REPLY_MSG_ID_BASE sm->msg_id_base
