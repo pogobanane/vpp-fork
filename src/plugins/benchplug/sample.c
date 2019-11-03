@@ -156,10 +156,13 @@ VLIB_CLI_COMMAND (sr_content_command, static) = {
 static void
 incr_mac_address (u8 * mac)
 {
-  u64 tmp = *((u64 *) mac);
+  u64 tmp = 0
+  clib_memcpy (mac, &a + 2, 6);
+  a >>= 1;
   u64 i = 1;
-  //tmp = clib_net_to_host_u64 (tmp);
   tmp += i;
+  tmp <<= 1;
+  //tmp = clib_net_to_host_u64 (tmp);
   //tmp += 1 << 16;   /* skip unused (least significant) octets */
   //tmp = clib_host_to_net_u64 (tmp);
   
