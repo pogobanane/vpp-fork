@@ -218,11 +218,12 @@ benchplug_macadd_command_fn (vlib_main_t * vm,
 
 /**
  * @brief CLI command to enable/disable the sample macswap plugin.
+ * benchplugaddbd1 add count 10 mac 20:00:00:00:00:00 int local0
  */
 VLIB_CLI_COMMAND (benchplug_addbd1, static) = {
     .path = "benchplugaddbd1",
     .short_help = 
-    "benchplugaddbd1 count <count> mac <macDstBase> int <intDst>",
+    "benchplugaddbd1 add count <count> mac <macDstBase> int <intDst>",
     .function = benchplug_macadd_command_fn,
 };
 
