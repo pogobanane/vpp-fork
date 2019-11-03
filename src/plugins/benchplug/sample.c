@@ -152,14 +152,17 @@ VLIB_CLI_COMMAND (sr_content_command, static) = {
 
 #include <vnet/l2/l2_fib.h>
 
+/* correlates to the moongen incAndWrap method (does basically the same) */
 static void
 incr_mac_address (u8 * mac)
 {
   u64 tmp = *((u64 *) mac);
-  tmp = clib_net_to_host_u64 (tmp);
-  tmp += 1 << 16;   /* skip unused (least significant) octets */
-  tmp = clib_host_to_net_u64 (tmp);
-
+  u64 i = 1;
+  //tmp = clib_net_to_host_u64 (tmp);
+  tmp += i;
+  //tmp += 1 << 16;   /* skip unused (least significant) octets */
+  //tmp = clib_host_to_net_u64 (tmp);
+  
   clib_memcpy (mac, &tmp, 6);
 }
 
