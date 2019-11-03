@@ -157,8 +157,8 @@ static void
 incr_mac_address (u8 * mac)
 {
   u64 tmp = 0;
-  clib_memcpy (mac, &a + 2, 6);
-  a >>= 1;
+  clib_memcpy (mac, &tmp + 2, 6);
+  tmp >>= 1;
   u64 i = 1;
   tmp += i;
   tmp <<= 1;
