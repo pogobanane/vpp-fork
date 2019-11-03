@@ -16,7 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 # for generated API headers:
 include_directories(${CMAKE_BINARY_DIR})
 
-add_vpp_plugin(sample
+add_vpp_plugin(benchplug
   SOURCES
   node.c
   sample.c
@@ -30,5 +30,5 @@ add_vpp_plugin(sample
   API_TEST_SOURCES
   sample_test.c
 
-  COMPONENT vpp-plugin-sample
+  COMPONENT vpp-benchplug-plugin
 )
