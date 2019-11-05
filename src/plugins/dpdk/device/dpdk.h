@@ -46,7 +46,6 @@
 
 #include <vnet/devices/devices.h>
 #include <plugins/benchplug/ipc.h>
-#include <plugins/benchplug/ringbuf.h>
 
 #if CLIB_DEBUG > 0
 #define always_inline static inline

@@ -10,20 +10,11 @@
 
 // TODO use rbuf->sizeOfBuffer after creation during runtime
 
-sample_ringbuffer_t* sample_ringbuf_init() 
+void sample_ringbuf_init(sample_ringbuffer_t* rbuf)
 {
-	sample_ringbuffer_t *rbuf = (sample_ringbuffer_t *) malloc(sizeof(sample_ringbuffer_t));
-	if (rbuf == NULL)
-		return NULL;
 	memset(rbuf, 0, sizeof(sample_ringbuffer_t));
 	rbuf->sizeOfBuffer = SAMPLE_RINGBUF_SIZE;
 	sample_ringbuf_reset(rbuf);
-	return rbuf;
-}
-
-void sample_ringbuf_destroy(sample_ringbuffer_t *rbuf)
-{
-	free(rbuf);
 }
 
 void sample_ringbuf_reset(sample_ringbuffer_t *rbuf)
@@ -72,7 +63,7 @@ uint32_t sample_ringbuf_extract_all(sample_ringbuffer_t *rbuf, uint32_t *n_rx_pa
 	// TODO not implemented
 	return 1;
 
-	uint32_t start_idx = rbuf->tailIndex;
+	//uint32_t start_idx = rbuf->tailIndex;
 	if (rbuf->tailIndex <= rbuf->headIndex)
 	{
 		uint32_t n_copy = rbuf->headIndex - rbuf->tailIndex;

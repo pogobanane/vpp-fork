@@ -36,9 +36,7 @@ typedef struct {
 	uint32_t n_rx_packets[SAMPLE_RINGBUF_SIZE];
 } sample_ringbuffer_t;
 
-sample_ringbuffer_t* sample_ringbuf_init();
-
-void sample_ringbuf_destroy(sample_ringbuffer_t *rbuf);
+void sample_ringbuf_init(sample_ringbuffer_t* rbuf);
 
 void sample_ringbuf_reset(sample_ringbuffer_t *rbuf);
 
