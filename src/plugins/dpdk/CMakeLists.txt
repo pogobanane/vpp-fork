@@ -134,6 +134,7 @@ add_vpp_plugin(dpdk
   ipsec/esp_encrypt.c
   ipsec/ipsec.c
   ../benchplug/ipc.c
+  ../benchplug/ringbuf.c
 
   MULTIARCH_SOURCES
   buffer.c
