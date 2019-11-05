@@ -14,9 +14,6 @@
 
 #include <stdatomic.h>
 
-/* TODO not used */
-#define SAMPLE_IPC_MEM_REQUEST_SIZE 1
-
 struct sample_ipc_mem_t;
 
 typedef struct {

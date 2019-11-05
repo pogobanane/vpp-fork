@@ -12,7 +12,7 @@
 struct sample_ipc_mem_t {
 	atomic_char guard;
 	uint32_t response;
-	sample_ipc_for_server_t request[SAMPLE_IPC_MEM_REQUEST_SIZE];
+	sample_ipc_for_server_t request;
 };
 
 void mmap_release(atomic_char *guard);
