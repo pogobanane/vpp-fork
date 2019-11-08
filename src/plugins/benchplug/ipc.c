@@ -147,18 +147,14 @@ void mmap_release(atomic_char *guard)
  * client: writes buf to server and returns received answer
  * TODO: bufs size is not checked
  */ 
-uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint32_t n_tx_packets)
+uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint32_t n_rx_packets)
 {
 	atomic_char *guard = &(self->memory->guard);
 	uint32_t response = 0;
 
 	mmap_client_wait(guard);
 	mmap_client_take(guard); // c
-	// not needed anymore since we don't use strings anymore
-	//sample_ipc_for_server_t msg[SAMPLE_IPC_MEM_REQUEST_SIZE];
-	// strncpy(msg, buf, sizeof(msg));
-	// memset(&(self->memory->request), 0, SAMPLE_IPC_MEM_REQUEST_SIZE);
-	sample_ringbuf_push(&(self->memory->request), n_tx_packets);
+	sample_ringbuf_push(&(self->memory->request), n_rx_packets);
 	memcpy(&response, &(self->memory->response), sizeof(response));
 	mmap_release(guard); // n
 	return response;
