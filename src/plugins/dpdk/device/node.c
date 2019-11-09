@@ -303,6 +303,8 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
   if ((xd->flags & DPDK_DEVICE_FLAG_ADMIN_UP) == 0)
     return 0;
 
+  sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
+
   /* get up to DPDK_RX_BURST_SZ buffers from PMD */
   while (n_rx_packets < DPDK_RX_BURST_SZ)
     {

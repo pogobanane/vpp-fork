@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vppinfra/cache.h>
 
 // TODO use rbuf->sizeOfBuffer after creation during runtime
 
@@ -21,6 +22,12 @@ void sample_ringbuf_reset(sample_ringbuffer_t *rbuf)
 {
 	rbuf->headIndex = 0;
 	rbuf->tailIndex = 0;
+}
+
+void sample_ringbuf_push_prefetch(sample_ringbuffer_t *rbuf)
+{
+	CLIB_PREFETCH(rbuf, CLIB_CACHE_LINE_BYTES, LOAD);
+	CLIB_PREFETCH(rbuf, CLIB_CACHE_LINE_BYTES, STORE);
 }
 
 // push onto top

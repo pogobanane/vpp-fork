@@ -143,6 +143,11 @@ void mmap_release(atomic_char *guard)
 	atomic_store(guard, 'n');
 }
 
+void sample_ipc_communicate_to_server_prefetch(sample_ipc_main_t *self)
+{
+	sample_ringbuf_push_prefetch(&self->memory->request);
+}
+
 /*
  * client: writes buf to server and returns received answer
  * TODO: bufs size is not checked
