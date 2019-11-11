@@ -45,7 +45,7 @@
 #include <rte_flow.h>
 
 #include <vnet/devices/devices.h>
-#include <benchplug/ipc.h>
+#include <plugins/benchplug/ipc.h>
 
 #if CLIB_DEBUG > 0
 #define always_inline static inline
