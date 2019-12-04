@@ -30,10 +30,16 @@ https://stackoverflow.com/questions/21038965/why-does-the-speed-of-memcpy-drop-d
 // capacity will be SAMPLE_RINGBUF_SIZE - 1
 
 typedef struct {
+	uint16_t port_id;
+	uint16_t queue_id;
+	uint32_t n_rx_packets;
+} sample_ringbuffer_data_t;
+
+typedef struct {
 	uint32_t headIndex; // next free field
 	uint32_t tailIndex; // oldest field or =headIndex if ring is empty
 	uint32_t sizeOfBuffer;
-	uint32_t n_rx_packets[SAMPLE_RINGBUF_SIZE];
+	sample_ringbuffer_data_t data[SAMPLE_RINGBUF_SIZE];
 } sample_ringbuffer_t;
 
 void sample_ringbuf_init(sample_ringbuffer_t* rbuf);
@@ -42,8 +48,8 @@ void sample_ringbuf_reset(sample_ringbuffer_t *rbuf);
 
 void sample_ringbuf_push_prefetch(sample_ringbuffer_t *rbuf);
 
-void sample_ringbuf_push(sample_ringbuffer_t *rbuf, uint32_t data);
+void sample_ringbuf_push(sample_ringbuffer_t *rbuf, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets);
 
-uint8_t sample_ringbuf_pop(sample_ringbuffer_t *rbuf, uint32_t *dst);
+uint8_t sample_ringbuf_pop(sample_ringbuffer_t *rbuf, sample_ringbuffer_data_t *dst);
 
 #endif /* __included_ringbuf_h__ */

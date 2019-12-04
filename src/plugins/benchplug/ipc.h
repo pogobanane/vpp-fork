@@ -41,7 +41,7 @@ clib_error_t* sample_ipc_close(sample_ipc_main_t *self);
 
 void sample_ipc_communicate_to_server_prefetch(sample_ipc_main_t *self);
 
-uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint32_t n_rx_packets);
+uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets);
 
 void sample_ipc_communicate_to_client(sample_ipc_main_t *self, uint32_t response, sample_ringbuffer_t* request);
 

@@ -31,9 +31,11 @@ void sample_ringbuf_push_prefetch(sample_ringbuffer_t *rbuf)
 }
 
 // push onto top
-void sample_ringbuf_push(sample_ringbuffer_t *rbuf, uint32_t data)
+void sample_ringbuf_push(sample_ringbuffer_t *rbuf, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets)
 {
-	rbuf->n_rx_packets[rbuf->headIndex] = data;
+	rbuf->data[rbuf->headIndex].port_id = port_id;
+	rbuf->data[rbuf->headIndex].queue_id = queue_id;
+	rbuf->data[rbuf->headIndex].n_rx_packets = n_rx_packets;
 
 	// update headIndex
 	// this acts as (idx+1)%size because size is a power of two
@@ -47,38 +49,37 @@ void sample_ringbuf_push(sample_ringbuffer_t *rbuf, uint32_t data)
 	}
 }
 
-// remove from bottom
-// return number of returned uwords (0 or 1)
-uint8_t sample_ringbuf_pop(sample_ringbuffer_t *rbuf, uint32_t *dst)
+// remove from bottom and memcpy data into dst
+// return number of returned sample_ringbuffer_data_ts (0 or 1)
+uint8_t sample_ringbuf_pop(sample_ringbuffer_t *rbuf, sample_ringbuffer_data_t *dst)
 {
 	if (rbuf->headIndex == rbuf->tailIndex) // rbuf is empty
 		return 0;
 
-	uint32_t n_rx_packets = rbuf->n_rx_packets[rbuf->tailIndex];
+	memcpy(dst, &(rbuf->data[rbuf->tailIndex]), sizeof(*dst));
 	rbuf->tailIndex += 1;
 	rbuf->tailIndex &= SAMPLE_RINGBUF_MAP;
 
-	*dst = n_rx_packets;
 	return 1;
 }
 
-// requirement: sizeof(*n_rx_packets) == rbuf->sizeOfBuffer
-// uword *n_rx_packets is the destination
+// requirement: sizeof(*data) == rbuf->sizeOfBuffer
+// *data is the destination
 // returns number of uwords copied
-uint32_t sample_ringbuf_extract_all(sample_ringbuffer_t *rbuf, uint32_t *n_rx_packets)
+uint32_t sample_ringbuf_extract_all(sample_ringbuffer_t *rbuf, sample_ringbuffer_data_t *data)
 {
-	// TODO not implemented
-	return 1;
+	// TODO not implemented because: takes too much brainpower to implement with hardly any performance gain
+	return 0;
 
 	//uint32_t start_idx = rbuf->tailIndex;
 	if (rbuf->tailIndex <= rbuf->headIndex)
 	{
 		uint32_t n_copy = rbuf->headIndex - rbuf->tailIndex;
-		memcpy(n_rx_packets, rbuf->n_rx_packets , sizeof(uint32_t) * n_copy);
+		memcpy(data, rbuf->data , sizeof(sample_ringbuffer_data_t) * n_copy);
 	} else // tailIndex > headIndex
 	{
 		uint32_t n_copy = rbuf->headIndex - rbuf->tailIndex;
-		memcpy(n_rx_packets, rbuf->n_rx_packets, sizeof(uint32_t) * n_copy);
+		memcpy(data, rbuf->data, sizeof(sample_ringbuffer_data_t) * n_copy);
 		//memcpy()
 	}
 	//uint32_t stop_idx = min(start_idx, )

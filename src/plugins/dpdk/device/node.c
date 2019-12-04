@@ -318,8 +318,7 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
     }
   
   // TODO ipc.push(n_rx_packets)
-  sample_ipc_communicate_to_server(&(dm->ai_ipc), n_rx_packets); 
-
+  sample_ipc_communicate_to_server(&(dm->ai_ipc), xd->port_id, queue_id, n_rx_packets); 
 
   if (n_rx_packets == 0)
     return 0;

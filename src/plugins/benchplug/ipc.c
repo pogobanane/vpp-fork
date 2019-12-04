@@ -152,14 +152,14 @@ void sample_ipc_communicate_to_server_prefetch(sample_ipc_main_t *self)
  * client: writes buf to server and returns received answer
  * TODO: bufs size is not checked
  */ 
-uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint32_t n_rx_packets)
+uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets)
 {
 	atomic_char *guard = &(self->memory->guard);
 	uint32_t response = 0;
 
 	mmap_client_wait(guard);
 	mmap_client_take(guard); // c
-	sample_ringbuf_push(&(self->memory->request), n_rx_packets);
+	sample_ringbuf_push(&(self->memory->request), port_id, queue_id, n_rx_packets);
 	memcpy(&response, &(self->memory->response), sizeof(response));
 	mmap_release(guard); // n
 	return response;
