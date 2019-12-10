@@ -281,6 +281,21 @@ dpdk_process_flow_offload (dpdk_device_t * xd, dpdk_per_thread_data_t * ptd,
     }
 }
 
+static_always_inline void dpdk_usleep(u32 usec)
+{
+  if (PREDICT_FALSE (usec > 0))
+  {
+    struct timespec ts, tsrem;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 1000 * usec;
+
+    while (nanosleep (&ts, &tsrem) < 0)
+    {
+      ts = tsrem;
+    }
+  }
+}
+
 static_always_inline u32
 dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
 		   vlib_node_runtime_t * node, u32 thread_index, u16 queue_id)
@@ -295,6 +310,8 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
   u8 or_flags;
   u32 n;
   int single_next = 0;
+
+  dpdk_usleep(1000);
 
   dpdk_per_thread_data_t *ptd = vec_elt_at_index (dm->per_thread_data,
 						  thread_index);
