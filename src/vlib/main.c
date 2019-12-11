@@ -46,8 +46,6 @@
 #include <vlib/unix/unix.h>
 #include <vlib/unix/cj.h>
 
-#include <sched.h>
-
 CJ_GLOBAL_LOG_PROTOTYPE;
 
 /* Actually allocate a few extra slots of vector data to support
@@ -1698,16 +1696,6 @@ vlib_main_or_worker_loop (vlib_main_t * vm, int is_main)
     }
   else
     cpu_time_now = clib_cpu_time_now ();
-
-  /* Set round robin scheduler for worker threads */
-  if (!is_main)
-  {
-    printf("Setting unix RR scheduler. \n");
-    struct sched_param param;
-    param.sched_priority = sched_get_priority_max(SCHED_RR);
-
-    sched_setscheduler(0, SCHED_RR, &param);
-  }
 
   /* Pre-allocate interupt runtime indices and lock. */
   vec_alloc (nm->pending_interrupt_node_runtime_indices, 32);
