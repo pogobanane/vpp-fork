@@ -296,6 +296,68 @@ static_always_inline void dpdk_usleep(u32 usec)
   }
 }
 
+static_always_inline void turn_on_intr(dpdk_main_t * dm, dpdk_device_t * xd, u16 queue_id)
+{
+  int i;
+  //struct lcore_rx_queue *rx_queue;
+  uint16_t port_id = xd->port_id;
+
+  /* get device config */
+
+  struct rte_eth_dev_info dev_info;
+  rte_eth_dev_info_get (xd->port_id, &dev_info);
+  struct rte_pci_device * pci_dev = dpdk_get_pci_device(&dev_info);
+  
+  vlib_pci_addr_t pci_addr;
+  pci_addr.domain = pci_dev->addr.domain;
+  pci_addr.bus = pci_dev->addr.bus;
+  pci_addr.slot = pci_dev->addr.devid;
+  pci_addr.function = pci_dev->addr.function;
+                  
+  uword * p = hash_get (dm->conf->device_config_index_by_pci_addr,
+            pci_addr.as_u32);
+  dpdk_device_config_t *devconf = pool_elt_at_index (dm->conf->dev_confs, p[0]);
+
+  for (i = 0; i < devconf->num_rx_queues; ++i) {
+    // TODO rte_spinlock_lock;
+    rte_eth_dev_rx_intr_enable(port_id, queue_id);
+    // rte_spinlock_unlock;
+  }
+}
+
+static_always_inline void sleep_until_rx_interrupt(int num) {
+  struct rte_epoll_event event[num];
+  int n, i;
+  uint16_t port_id;
+  uint8_t queue_id;
+  void *data;
+
+  // sleep until interrupt
+  n = rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, -1);
+  for (i = 0; i < n; i++) {
+    data = event[i].epdata.data;
+    port_id = ((uintptr_t)data) >> CHAR_BIT;
+    queue_id = ((uintptr_t)data) & RTE_LEN2MASK(CHAR_BIT, uint8_t);
+    // take everyone out of interrupt mode
+    rte_eth_dev_rx_intr_disable(port_id, queue_id);
+  }
+}
+
+/* does the following:
+ * 1. turn on interrupt mode
+ * 2. wait for interrupt signaling a new packet arrived
+ * 3. turn off interrupt mode
+ * TODO: check threading stuff (at epoll)
+ */
+static_always_inline void wait_for_packet_int(uint16_t port_id, uint8_t queue_id)
+{
+  int num = 1;
+  struct rte_epoll_event event[num];
+  rte_eth_dev_rx_intr_enable(port_id, queue_id);
+  rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, -1);
+  rte_eth_dev_rx_intr_disable(port_id, queue_id);
+}
+
 static_always_inline u32
 dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
 		   vlib_node_runtime_t * node, u32 thread_index, u16 queue_id)
@@ -311,17 +373,20 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
   u32 n;
   int single_next = 0;
 
-  dpdk_usleep(1000);
-
   dpdk_per_thread_data_t *ptd = vec_elt_at_index (dm->per_thread_data,
 						  thread_index);
+
   vlib_buffer_t *bt = &ptd->buffer_template;
 
   if ((xd->flags & DPDK_DEVICE_FLAG_ADMIN_UP) == 0)
     return 0;
 
-  sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
+  dpdk_usleep(1000);
+  rte_delay_us(1);
+  wait_for_packet_int(xd->port_id, queue_id);
 
+  sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
+  
   /* get up to DPDK_RX_BURST_SZ buffers from PMD */
   while (n_rx_packets < DPDK_RX_BURST_SZ)
     {
