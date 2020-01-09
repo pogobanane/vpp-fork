@@ -263,8 +263,8 @@ ai_ctl_command_fn (vlib_main_t * vm,
   else if (is_comm)
     {
       vlib_cli_output (vm, "AI: communicating...");
-      u32 val = sample_ipc_communicate_to_server(&(sm->ipc), 1, 2, 666);
-      vlib_cli_output (vm, "done. Val: %d", val);
+      sample_ipc_communicate_to_server(&(sm->ipc), 1, 2, 666);
+      vlib_cli_output (vm, "done. Answer poll1: %d", sm->ipc.last_response.poll1);
 
     }
   else if (is_stop)

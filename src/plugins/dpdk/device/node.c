@@ -281,6 +281,8 @@ dpdk_process_flow_offload (dpdk_device_t * xd, dpdk_per_thread_data_t * ptd,
     }
 }
 
+// returns very quickly if usec = 0
+// returns control over cpu back to scheduler
 static_always_inline void dpdk_usleep(u32 usec)
 {
   if (PREDICT_FALSE (usec > 0))
@@ -293,6 +295,17 @@ static_always_inline void dpdk_usleep(u32 usec)
     {
       ts = tsrem;
     }
+  }
+}
+
+// per api definition: execute "do nothing" cpu instructions
+// can be overwritten though
+// returns very quickly when usec == 0
+static_always_inline void dpdk_udelay(u32 usec)
+{
+  if (PREDICT_FALSE (usec > 0))
+  {
+    rte_delay_us(usec);
   }
 }
 
@@ -382,7 +395,7 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
     return 0;
 
   dpdk_usleep(1000);
-  rte_delay_us(1);
+  dpdk_udelay(1);
   wait_for_packet_int(xd->port_id, queue_id);
 
   sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));

@@ -11,7 +11,7 @@
 
 struct sample_ipc_mem_t {
 	atomic_char guard;
-	uint32_t response;
+	sample_ipc_for_client_t response;
 	sample_ringbuffer_t request;
 };
 
@@ -149,27 +149,26 @@ void sample_ipc_communicate_to_server_prefetch(sample_ipc_main_t *self)
 }
 
 /*
- * client: writes buf to server and returns received answer
+ * client: writes n_rx_packets to server
+ * copies response o self->last_response
  * TODO: bufs size is not checked
  */ 
-uint32_t sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets)
+void sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint16_t port_id, uint16_t queue_id, uint32_t n_rx_packets)
 {
 	atomic_char *guard = &(self->memory->guard);
-	uint32_t response = 0;
 
 	mmap_client_wait(guard);
 	mmap_client_take(guard); // c
 	sample_ringbuf_push(&(self->memory->request), port_id, queue_id, n_rx_packets);
-	memcpy(&response, &(self->memory->response), sizeof(response));
+	memcpy(&(self->last_response), &(self->memory->response), sizeof(self->last_response));
 	mmap_release(guard); // n
-	return response;
 }
 
 /*
  * server: reads and resets the filled ringbuffer from client, copies
  * it to request and sends response
  */ 
-void sample_ipc_communicate_to_client(sample_ipc_main_t *self, uint32_t response, sample_ringbuffer_t* request)
+void sample_ipc_communicate_to_client(sample_ipc_main_t *self, sample_ipc_for_client_t *response, sample_ringbuffer_t* request)
 {
 	atomic_char *guard = &(self->memory->guard);
 
@@ -182,7 +181,7 @@ void sample_ipc_communicate_to_client(sample_ipc_main_t *self, uint32_t response
 	// empty the shared memory ringbuffer
 	sample_ringbuf_reset(&(self->memory->request));
 
-	memcpy(&(self->memory->response), &response, sizeof(response));
+	memcpy(&(self->memory->response), response, sizeof(self->memory->response));
 	mmap_release(guard); // n
 	// mmap_wait_for_server(guard);
 	// memcpy(&response, self->memory, sizeof(response));
