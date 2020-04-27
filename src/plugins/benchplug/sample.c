@@ -236,6 +236,7 @@ ai_ctl_command_fn (vlib_main_t * vm,
   u32 is_start = 0;
   u32 is_stop = 0;
   u32 is_comm = 0;
+  u32 is_last_answer = 0;
 
   clib_error_t *error = 0;
 
@@ -247,6 +248,8 @@ ai_ctl_command_fn (vlib_main_t * vm,
   is_stop = 1;
       else if (unformat (input, "comm"))
   is_comm = 1;
+      else if (unformat (input, "last_answer"))
+  is_last_answer = 1;
       else
   break;
     }
@@ -271,6 +274,13 @@ ai_ctl_command_fn (vlib_main_t * vm,
     {
 	error = sample_ipc_close(&(sm->ipc));
     }
+  else if (is_last_answer)
+    {
+      vlib_cli_output(vm, "Last received answer:");
+      vlib_cli_output(vm, "    udelay:        %d", sm->ipc.last_response.udelay);
+      vlib_cli_output(vm, "    usleep:        %d", sm->ipc.last_response.usleep);
+      vlib_cli_output(vm, "    use_interrupt: %d", sm->ipc.last_response.use_interrupt);
+    }
 
   return error;
 }
@@ -283,7 +293,7 @@ ai_ctl_command_fn (vlib_main_t * vm,
 VLIB_CLI_COMMAND (ai_ctl, static) = {
     .path = "ai",
     .short_help = 
-    "ai [ start | comm | stop ]",
+    "ai [ start | comm | stop | last_answer ]",
     .function = ai_ctl_command_fn,
 };
 
