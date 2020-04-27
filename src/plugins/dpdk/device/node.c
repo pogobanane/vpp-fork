@@ -360,14 +360,15 @@ static_always_inline void sleep_until_rx_interrupt(int num) {
  * 1. turn on interrupt mode
  * 2. wait for interrupt signaling a new packet arrived
  * 3. turn off interrupt mode
+ * timeout: -1 to turn off
  * TODO: check threading stuff (at epoll)
  */
-static_always_inline void wait_for_packet_int(uint16_t port_id, uint8_t queue_id)
+static_always_inline void wait_for_packet_int(uint16_t port_id, uint8_t queue_id, uint32_t timeout)
 {
   int num = 1;
   struct rte_epoll_event event[num];
   rte_eth_dev_rx_intr_enable(port_id, queue_id);
-  rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, -1);
+  rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, timeout);
   rte_eth_dev_rx_intr_disable(port_id, queue_id);
 }
 
@@ -394,9 +395,10 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
   if ((xd->flags & DPDK_DEVICE_FLAG_ADMIN_UP) == 0)
     return 0;
 
-  dpdk_usleep(1000);
-  dpdk_udelay(1);
-  wait_for_packet_int(xd->port_id, queue_id);
+  dpdk_udelay(dm->ai_ipc.last_response.udelay);
+  dpdk_usleep(dm->ai_ipc.last_response.usleep);
+  wait_for_packet_int(xd->port_id, queue_id, 
+      dm->ai_ipc.last_response.use_interrupt);
 
   sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
   

@@ -77,6 +77,15 @@ int sample_ipc_open(sample_ipc_main_t *self)
 	self->memory = file_memory;
 	self->size = mmap_size;
 
+	// initialize with sane defaults
+	self->last_response.poll1 = 0;
+	self->last_response.udelay = 0;
+	self->last_response.poll2 = 0;
+	self->last_response.usleep = 0;
+	self->last_response.poll3 = 0;
+	self->last_response.use_interrupt = 0;
+	self->last_response.poll4 = 0;
+
 	// initialize
 	sample_ringbuf_init(&self->memory->request);
 	atomic_char *guard = &(self->memory->guard);

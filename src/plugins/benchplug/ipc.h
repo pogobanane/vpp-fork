@@ -29,7 +29,7 @@ typedef struct {
     u32 poll2;
     u32 usleep;
     u32 poll3;
-    u32 use_interrupt; // actually a boolean
+    u32 use_interrupt; // may be used as boolean or as wait-for-interrupt-timeout
     u32 poll4;
 } sample_ipc_for_client_t;
 
