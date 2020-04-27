@@ -102,9 +102,9 @@ show_dpdk_ipc_last_response (vlib_main_t * vm, unformat_input_t * input,
   dpdk_main_t *dm = &dpdk_main;
 
   vlib_cli_output(vm, "Last received answer:");
-  vlib_cli_output(vm, "    udelay:        %d", dm->ipc.last_response.udelay);
-  vlib_cli_output(vm, "    usleep:        %d", dm->ipc.last_response.usleep);
-  vlib_cli_output(vm, "    use_interrupt: %d", dm->ipc.last_response.use_interrupt);
+  vlib_cli_output(vm, "    udelay:        %d", dm->ai_ipc.last_response.udelay);
+  vlib_cli_output(vm, "    usleep:        %d", dm->ai_ipc.last_response.usleep);
+  vlib_cli_output(vm, "    use_interrupt: %d", dm->ai_ipc.last_response.use_interrupt);
  
   return 0;
 }
