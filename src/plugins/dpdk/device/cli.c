@@ -96,6 +96,32 @@ done:
 #endif
 
 static clib_error_t *
+show_dpdk_ipc_last_response (vlib_main_t * vm, unformat_input_t * input,
+		  vlib_cli_command_t * cmd)
+{
+  dpdk_main_t *dm = &dpdk_main;
+
+  vlib_cli_output(vm, "Last received answer:");
+  vlib_cli_output(vm, "    udelay:        %d", dm->ipc.last_response.udelay);
+  vlib_cli_output(vm, "    usleep:        %d", dm->ipc.last_response.usleep);
+  vlib_cli_output(vm, "    use_interrupt: %d", dm->ipc.last_response.use_interrupt);
+ 
+  return 0;
+}
+
+/*?
+ * This command displays the last ipc response
+?*/
+/* *INDENT-OFF* */
+VLIB_CLI_COMMAND (cmd_show_dpdk_ipc_last_response,static) = {
+    .path = "show dpdk ipc last_response",
+    .short_help = "show dpdk ipc last response",
+    .function = show_dpdk_ipc_last_response,
+};
+/* *INDENT-ON* */
+
+
+static clib_error_t *
 show_dpdk_buffer (vlib_main_t * vm, unformat_input_t * input,
 		  vlib_cli_command_t * cmd)
 {
