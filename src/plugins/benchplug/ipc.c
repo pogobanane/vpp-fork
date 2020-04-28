@@ -190,7 +190,7 @@ void sample_ipc_communicate_to_client(sample_ipc_main_t *self, sample_ipc_for_cl
 	// empty the shared memory ringbuffer
 	sample_ringbuf_reset(&(self->memory->request));
 
-	memcpy(&(self->memory->response), response, sizeof(self->memory->response));
+	memcpy(&(self->memory->response), response, sizeof(sample_ipc_for_client_t));
 	mmap_release(guard); // n
 	// mmap_wait_for_server(guard);
 	// memcpy(&response, self->memory, sizeof(response));
