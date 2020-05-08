@@ -83,7 +83,7 @@ int sample_ipc_open(sample_ipc_main_t *self)
 	self->last_response.poll2 = 0;
 	self->last_response.usleep = 0;
 	self->last_response.poll3 = 0;
-	self->last_response.use_interrupt = -1;
+	self->last_response.use_interrupt = 0;
 	self->last_response.poll4 = 0;
 
 	// initialize

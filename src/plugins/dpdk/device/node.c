@@ -360,7 +360,7 @@ static_always_inline void sleep_until_rx_interrupt(int num) {
  * 1. turn on interrupt mode
  * 2. wait for interrupt signaling a new packet arrived
  * 3. turn off interrupt mode
- * timeout: -1 to turn off
+ * timeout: -1 to turn off timeout, 0 to return immediately
  * TODO: check threading stuff (at epoll)
  */
 static_always_inline void wait_for_packet_int(uint16_t port_id, uint8_t queue_id, uint32_t timeout)
