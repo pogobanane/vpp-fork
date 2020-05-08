@@ -368,8 +368,62 @@ static_always_inline void wait_for_packet_int(uint16_t port_id, uint8_t queue_id
   int num = 1;
   struct rte_epoll_event event[num];
   rte_eth_dev_rx_intr_enable(port_id, queue_id);
-  rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, timeout);
+  rte_epoll_wait(RTE_EPOLL_PER_THREAD, event, num, timeout); // timeout in ms (passed through to epoll_wait)
   rte_eth_dev_rx_intr_disable(port_id, queue_id);
+}
+
+/**
+ * @param n_rx_packets nr. of packets already received into ptd->mbufs
+ * @param until poll packets until a rx poll burst was smaller than this
+ */
+static_always_inline u16 poll_packets_until(u16 port_id, u16 queue_id, 
+    dpdk_per_thread_data_t* ptd, u16 n_rx_packets, u16 until) 
+{
+  u16 n = 0;
+
+  /* get up to DPDK_RX_BURST_SZ buffers from PMD */
+  while (n_rx_packets < DPDK_RX_BURST_SZ)
+    {
+      n = rte_eth_rx_burst (port_id, queue_id,
+			    ptd->mbufs + n_rx_packets,
+			    DPDK_RX_BURST_SZ - n_rx_packets);
+      n_rx_packets += n;
+
+      if (n < until)
+	break;
+    }
+
+  return n_rx_packets;
+}
+
+static_always_inline u16 poll_packets_cmd(u16 port_id, u16 queue_id, 
+    dpdk_per_thread_data_t* ptd, sample_ipc_for_client_t* cmd) 
+{
+  u16 n_rx_packets = 0;
+  u16 n;
+
+  n = poll_packets_until(port_id, queue_id, 
+      ptd, n_rx_packets, cmd->poll1);
+  n_rx_packets += n;
+  if (n <= 0) {
+    dpdk_udelay(cmd->udelay);
+    n = poll_packets_until(port_id, queue_id, 
+      ptd, n_rx_packets, cmd->poll1);
+    n_rx_packets += n;
+    if (n <= 0) {
+      dpdk_usleep(cmd->usleep);
+      n = poll_packets_until(port_id, queue_id, 
+        ptd, n_rx_packets, cmd->poll1);
+      n_rx_packets += n;
+      if (n <= 0) {
+        wait_for_packet_int(port_id, queue_id, cmd->use_interrupt);
+        n = poll_packets_until(port_id, queue_id, 
+          ptd, n_rx_packets, cmd->poll1);
+        n_rx_packets += n;
+      }
+    }
+  }
+  return n_rx_packets;
 }
 
 static_always_inline u32
@@ -395,24 +449,21 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
   if ((xd->flags & DPDK_DEVICE_FLAG_ADMIN_UP) == 0)
     return 0;
 
-  dpdk_udelay(dm->ai_ipc.last_response.udelay);
-  dpdk_usleep(dm->ai_ipc.last_response.usleep);
-  wait_for_packet_int(xd->port_id, queue_id, 
-      dm->ai_ipc.last_response.use_interrupt);
-
   sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
-  
-  /* get up to DPDK_RX_BURST_SZ buffers from PMD */
-  while (n_rx_packets < DPDK_RX_BURST_SZ)
-    {
-      n = rte_eth_rx_burst (xd->port_id, queue_id,
-			    ptd->mbufs + n_rx_packets,
-			    DPDK_RX_BURST_SZ - n_rx_packets);
-      n_rx_packets += n;
 
-      if (n < 32)
-	break;
-    }
+  n_rx_packets = poll_packets_cmd(xd->port_id, queue_id, ptd, &(dm->ai_ipc.last_response));
+ 
+  /* get up to DPDK_RX_BURST_SZ buffers from PMD */
+  /*while (n_rx_packets < DPDK_RX_BURST_SZ)*/
+    /*{*/
+      /*n = rte_eth_rx_burst (xd->port_id, queue_id,*/
+					/*ptd->mbufs + n_rx_packets,*/
+					/*DPDK_RX_BURST_SZ - n_rx_packets);*/
+      /*n_rx_packets += n;*/
+
+      /*if (n < 32)*/
+	/*break;*/
+    /*}*/
   
   // TODO ipc.push(n_rx_packets)
   sample_ipc_communicate_to_server(&(dm->ai_ipc), xd->port_id, queue_id, n_rx_packets); 
