@@ -16,6 +16,8 @@
 
 #include <benchplug/ringbuf.h>
 
+#define SAMPLE_IPC_RX_QUEUES 2
+
 struct sample_ipc_mem_t;
 
 /* 
@@ -34,6 +36,10 @@ typedef struct {
 } sample_ipc_for_client_t;
 
 typedef struct {
+    uint16_t reach_level;
+} sample_ipc_queue_t;
+
+typedef struct {
     /* Filedescriptor describing the mmap */
     int fd;
 
@@ -43,6 +49,8 @@ typedef struct {
     /* read only message for client which is being
      * updated while communicating to server */
     sample_ipc_for_client_t last_response;
+
+    sample_ipc_queue_t rx_queue[SAMPLE_IPC_RX_QUEUES];
 
     int size;
 } sample_ipc_main_t;
@@ -64,4 +72,7 @@ void sample_ipc_communicate_to_server(sample_ipc_main_t *self, uint16_t port_id,
 
 void sample_ipc_communicate_to_client(sample_ipc_main_t *self, sample_ipc_for_client_t *response, sample_ringbuffer_t* request);
 
+uint16_t sample_ipc_queue_min_level(sample_ipc_main_t *self);
+
+void sample_ipc_queue_set_level(sample_ipc_main_t *self, uint16_t queue_id, uint16_t level);
 #endif /* __included_ipc_h__ */

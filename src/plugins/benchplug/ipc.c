@@ -15,6 +15,27 @@ struct sample_ipc_mem_t {
 	sample_ringbuffer_t request;
 };
 
+/*
+ * An algorithm using sample_ipc_for_client_t would require per queue data which is not available right now in vpp.
+ * It is required because udelays etc must only happen if the fastest
+ * queue processed by this thread is bored enough to endure udelays.
+ *
+ * Therefore the following workaround is made for SAMPLE_IPC_RX_QUEUES queues and 
+ * tries not to crash on configurations with more than two queues.
+ */
+uint16_t sample_ipc_queue_min_level(sample_ipc_main_t *self) {
+    uint16_t min_level = self->rx_queue[0].reach_level;
+    for (uint16_t i = 1; i < SAMPLE_IPC_RX_QUEUES; ++i) {
+        if (self->rx_queue[i].reach_level < min_level)
+            min_level = self->rx_queue[i].reach_level;
+    }
+    return min_level;
+}
+
+void sample_ipc_queue_set_level(sample_ipc_main_t *self, uint16_t queue_id, uint16_t level) {
+    self->rx_queue[queue_id % SAMPLE_IPC_RX_QUEUES].reach_level = level;
+}
+
 void mmap_release(atomic_char *guard);
 
 int make_space(int file_descriptor, int bytes) 

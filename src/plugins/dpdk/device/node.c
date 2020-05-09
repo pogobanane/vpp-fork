@@ -397,29 +397,53 @@ static_always_inline u16 poll_packets_until(u16 port_id, u16 queue_id,
 }
 
 static_always_inline u16 poll_packets_cmd(u16 port_id, u16 queue_id, 
-    dpdk_per_thread_data_t* ptd, sample_ipc_for_client_t* cmd) 
+    dpdk_per_thread_data_t* ptd, sample_ipc_main_t* ipc_main) 
 {
   u16 n_rx_packets = 0;
   u16 n;
+  sample_ipc_for_client_t* cmd = &(ipc_main->last_response);
 
+  // level 0
   n = poll_packets_until(port_id, queue_id, 
       ptd, n_rx_packets, cmd->poll1);
   n_rx_packets += n;
-  if (n <= 0) {
-    dpdk_udelay(cmd->udelay);
-    n = poll_packets_until(port_id, queue_id, 
-      ptd, n_rx_packets, cmd->poll1);
-    n_rx_packets += n;
-    if (n <= 0) {
-      dpdk_usleep(cmd->usleep);
+  if (n > 0) {
+    // there are new packets, everyone go at max to level 0
+    sample_ipc_queue_set_level(ipc_main, queue_id, 0);
+  } else { 
+    // there are no packets, so try to proceed into a higher level
+    sample_ipc_queue_set_level(ipc_main, queue_id, 1);
+    if (sample_ipc_queue_min_level(ipc_main) >= 1) {
+      // other queues have a level >= this as well
+      // level 1
+      dpdk_udelay(cmd->udelay);
       n = poll_packets_until(port_id, queue_id, 
         ptd, n_rx_packets, cmd->poll1);
       n_rx_packets += n;
-      if (n <= 0) {
-        wait_for_packet_int(port_id, queue_id, cmd->use_interrupt);
-        n = poll_packets_until(port_id, queue_id, 
-          ptd, n_rx_packets, cmd->poll1);
-        n_rx_packets += n;
+      if (n > 0) {
+        sample_ipc_queue_set_level(ipc_main, queue_id, 1);
+      } else {
+        sample_ipc_queue_set_level(ipc_main, queue_id, 2);
+        if (sample_ipc_queue_min_level(ipc_main) >= 2) {
+          // level 2
+          dpdk_usleep(cmd->usleep);
+          n = poll_packets_until(port_id, queue_id, 
+            ptd, n_rx_packets, cmd->poll1);
+          n_rx_packets += n;
+          if (n > 0) {
+            sample_ipc_queue_set_level(ipc_main, queue_id, 2);
+          } else {
+            sample_ipc_queue_set_level(ipc_main, queue_id, 3);
+            if (sample_ipc_queue_min_level(ipc_main) >= 3) {
+              // level 3
+              sample_ipc_queue_set_level(ipc_main, queue_id, 3);
+              wait_for_packet_int(port_id, queue_id, cmd->use_interrupt);
+              n = poll_packets_until(port_id, queue_id, 
+                ptd, n_rx_packets, cmd->poll1);
+              n_rx_packets += n;
+            }
+          }
+        }
       }
     }
   }
@@ -451,7 +475,7 @@ dpdk_device_input (vlib_main_t * vm, dpdk_main_t * dm, dpdk_device_t * xd,
 
   sample_ipc_communicate_to_server_prefetch(&(dm->ai_ipc));
 
-  n_rx_packets = poll_packets_cmd(xd->port_id, queue_id, ptd, &(dm->ai_ipc.last_response));
+  n_rx_packets = poll_packets_cmd(xd->port_id, queue_id, ptd, &(dm->ai_ipc));
  
   /* get up to DPDK_RX_BURST_SZ buffers from PMD */
   /*while (n_rx_packets < DPDK_RX_BURST_SZ)*/
