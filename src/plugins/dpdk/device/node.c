@@ -409,10 +409,10 @@ static_always_inline u16 poll_packets_cmd(u16 port_id, u16 queue_id,
   n_rx_packets += n;
   if (n > 0) {
     // there are new packets, everyone go at max to level 0
-    sample_ipc_queue_set_level(ipc_main, queue_id, 0);
+    sample_ipc_queue_set_level(ipc_main, port_id, 0);
   } else { 
     // there are no packets, so try to proceed into a higher level
-    sample_ipc_queue_set_level(ipc_main, queue_id, 1);
+    sample_ipc_queue_set_level(ipc_main, port_id, 1);
     if (sample_ipc_queue_min_level(ipc_main) >= 1) {
       // other queues have a level >= this as well
       // level 1
@@ -421,9 +421,9 @@ static_always_inline u16 poll_packets_cmd(u16 port_id, u16 queue_id,
         ptd, n_rx_packets, cmd->poll1);
       n_rx_packets += n;
       if (n > 0) {
-        sample_ipc_queue_set_level(ipc_main, queue_id, 1);
+        sample_ipc_queue_set_level(ipc_main, port_id, 1);
       } else {
-        sample_ipc_queue_set_level(ipc_main, queue_id, 2);
+        sample_ipc_queue_set_level(ipc_main, port_id, 2);
         if (sample_ipc_queue_min_level(ipc_main) >= 2) {
           // level 2
           dpdk_usleep(cmd->usleep);
@@ -431,12 +431,12 @@ static_always_inline u16 poll_packets_cmd(u16 port_id, u16 queue_id,
             ptd, n_rx_packets, cmd->poll1);
           n_rx_packets += n;
           if (n > 0) {
-            sample_ipc_queue_set_level(ipc_main, queue_id, 2);
+            sample_ipc_queue_set_level(ipc_main, port_id, 2);
           } else {
-            sample_ipc_queue_set_level(ipc_main, queue_id, 3);
+            sample_ipc_queue_set_level(ipc_main, port_id, 3);
             if (sample_ipc_queue_min_level(ipc_main) >= 3) {
               // level 3
-              sample_ipc_queue_set_level(ipc_main, queue_id, 3);
+              sample_ipc_queue_set_level(ipc_main, port_id, 3);
               wait_for_packet_int(port_id, queue_id, cmd->use_interrupt);
               n = poll_packets_until(port_id, queue_id, 
                 ptd, n_rx_packets, cmd->poll1);

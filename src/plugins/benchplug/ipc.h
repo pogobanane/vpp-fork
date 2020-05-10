@@ -50,6 +50,7 @@ typedef struct {
      * updated while communicating to server */
     sample_ipc_for_client_t last_response;
 
+    // TODO rename or move to port
     sample_ipc_queue_t rx_queue[SAMPLE_IPC_RX_QUEUES];
 
     int size;
