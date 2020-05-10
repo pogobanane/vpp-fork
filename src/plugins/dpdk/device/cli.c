@@ -109,6 +109,10 @@ show_dpdk_ipc_last_response (vlib_main_t * vm, unformat_input_t * input,
   vlib_cli_output(vm, "    poll3:         %d", dm->ai_ipc.last_response.poll3);
   vlib_cli_output(vm, "    use_interrupt: %d", dm->ai_ipc.last_response.use_interrupt);
   vlib_cli_output(vm, "    poll4:         %d", dm->ai_ipc.last_response.poll4);
+  vlib_cli_output(vm, "Lazyness level: ");
+  for (int i = 0; i < SAMPLE_IPC_RX_QUEUES; i++) {
+    vlib_cli_output(vm, "port%d: %d", i, dm->ai_ipc.rx_queue[i].reach_level);
+  }
  
   return 0;
 }
